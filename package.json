@@ -1,5 +1,5 @@
 {
-  "name": "template-proj",
+  "name": "wechat-sdk-service",
   "version": "0.0.1",
   "description": "Simple auth server for wechat js-sdk",
   "author": "Oliver.W(ole3021@gmail.com)",
