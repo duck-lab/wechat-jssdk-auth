@@ -1,0 +1,64 @@
+{
+  "name": "template-proj",
+  "version": "0.0.1",
+  "description": "Simple auth server for wechat js-sdk",
+  "author": "Oliver.W(ole3021@gmail.com)",
+  "license": "MIT",
+  "scripts": {
+    "format": "prettier --write \"**/*.ts\"",
+    "prestart": "rm -rf dist && tsc",
+    "start": "node dist/main.js",
+    "start:dev": "nodemon",
+    "start:hmr": "node dist/server",
+    "serve": "ts-node -r tsconfig-paths/register src/main.ts",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "webpack": "webpack --config webpack.config.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^5.0.0",
+    "@nestjs/core": "^5.0.0",
+    "axios": "^0.18.0",
+    "cors": "^2.8.4",
+    "dayjs": "^1.6.9",
+    "fastify-formbody": "^2.0.0",
+    "reflect-metadata": "^0.1.12",
+    "rxjs": "^6.0.0",
+    "typescript": "^2.6.2"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^5.0.0",
+    "@types/debug": "^0.0.30",
+    "@types/express": "^4.0.39",
+    "@types/jest": "^21.1.8",
+    "@types/node": "^9.3.0",
+    "@types/supertest": "^2.0.4",
+    "debug": "^3.1.0",
+    "jest": "^21.2.1",
+    "nodemon": "^1.14.1",
+    "prettier": "^1.11.1",
+    "supertest": "^3.0.0",
+    "ts-jest": "^21.2.4",
+    "ts-loader": "^4.1.0",
+    "ts-node": "^4.1.0",
+    "tsconfig-paths": "^3.1.1",
+    "tslint": "5.3.2",
+    "webpack": "^4.2.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-node-externals": "^1.6.0"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".spec.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "coverageDirectory": "../coverage"
+  }
+}
