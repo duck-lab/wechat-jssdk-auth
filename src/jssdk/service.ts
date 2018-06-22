@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-const debug = require('debug')('wxauth:wechat');
+import * as debug from 'debug';
+import * as dayjs from 'dayjs';
+const log = debug('wxauth:jssdk');
 
 import { WeChatService } from '../wechat/service';
 
@@ -15,7 +17,7 @@ const WECHAT_SECRET = 'WECHAT_SECRET';
 @Injectable()
 export class JSSDKService extends WeChatService {
   private ticket: string = null;
-  private ticketExpires: number = 0;
+  private ticketExpiresTime: dayjs.Dayjs = null;
 
   constructor(
     @Inject(WECHAT_APP_ID) appId: string,
@@ -24,25 +26,39 @@ export class JSSDKService extends WeChatService {
     super(appId, secret);
   }
 
-  async getSDKTicket(): Promise<SDKTicket> {
-    if (!this.accessToken) await this.getAccessToken();
+  async getSDKTicket(): Promise<SDKTicket | void> {
+    try {
+      if (this.ticket && dayjs().isBefore(this.ticketExpiresTime))
+        return Promise.resolve({
+          ticket: this.ticket,
+          expiresIn: this.ticketExpiresTime.diff(dayjs(), 'second'),
+        });
+      if (!this.accessToken) await this.getAccessToken();
 
-    if (this.ticket)
-      return Promise.resolve({
-        ticket: this.ticket,
-        expiresIn: this.ticketExpires,
-      });
-    return this.wechatService
-      .get('/cgi-bin/token', {
-        params: {
-          access_token: this.accessToken,
-          type: 'jsapi',
-        },
-      })
-      .then(({ data }) => {
-        debug('>>> fetch ticket success');
-        return <SDKTicket>data;
-      })
-      .catch(err => debug('>>> fail fetch ticket: ', err));
+      return this.wechatService
+        .get('/cgi-bin/ticket/getticket', {
+          params: {
+            access_token: this.accessToken,
+            type: 'jsapi',
+          },
+        })
+        .then(({ data }) => {
+          const { errcode, errmsg, ticket, expires_in } = data;
+          if (errcode && errcode !== 0) throw new Error(errmsg);
+          this.ticket = ticket;
+          this.ticketExpiresTime = dayjs().add(
+            expires_in - 200 /* Give some spare time before expires */,
+            'second',
+          );
+          log('>>> fetch ticket success');
+          return {
+            ticket,
+            expiresIn: expires_in,
+          } as SDKTicket;
+        })
+        .catch(err => log('>>> fail fetch ticket: ', err));
+    } catch (error) {
+      throw error;
+    }
   }
 }

@@ -6,7 +6,7 @@ export class JSSDKController {
   constructor(private readonly sdkService: JSSDKService) {}
 
   @Get('ticket')
-  getTicket(): Promise<SDKTicket> {
+  getTicket(): Promise<SDKTicket | void> {
     return this.sdkService.getSDKTicket();
   }
 }

@@ -1,6 +1,9 @@
-import { Component } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-const debug = require('debug')('wxauth:wechat');
+import * as debug from 'debug';
+import * as dayjs from 'dayjs';
+const log = debug('wxauth:wechat');
+
 import Axios from 'axios';
 
 interface AccessToken {
@@ -8,22 +11,22 @@ interface AccessToken {
   expiresIn: number;
 }
 
-@Component()
+@Injectable()
 export class WeChatService {
   protected wechatService = Axios.create({
     baseURL: 'https://api.weixin.qq.com',
-    timeout: 1000,
+    timeout: 6000,
   });
   protected accessToken: string = null;
-  protected accessTokenExpires: number = 0;
+  protected accessTokenExpiresTime: dayjs.Dayjs = null;
 
   constructor(protected appId: string, protected secret: string) {}
 
   getAccessToken(): Promise<AccessToken | void> {
-    if (this.accessToken)
+    if (this.accessToken && dayjs().isBefore(this.accessTokenExpiresTime))
       return Promise.resolve({
         accessToken: this.accessToken,
-        expiresIn: this.accessTokenExpires,
+        expiresIn: this.accessTokenExpiresTime.diff(dayjs(), 'second'),
       });
     return this.wechatService
       .get('/cgi-bin/token', {
@@ -34,12 +37,19 @@ export class WeChatService {
         },
       })
       .then(({ data }) => {
-        debug('>>> fetch accesstoken success');
-        return <AccessToken>{
-          accessToken: data.access_token,
-          expiresIn: data.expires_in,
-        };
+        const { errcode, errmsg, access_token, expires_in } = data;
+        if (errcode && errcode !== 0) throw new Error(errmsg);
+        this.accessToken = access_token;
+        this.accessTokenExpiresTime = dayjs().add(
+          expires_in - 200 /* Give some spare time before expires */,
+          'second',
+        );
+        log('>>> fetch accesstoken success');
+        return {
+          accessToken: access_token,
+          expiresIn: expires_in,
+        } as AccessToken;
       })
-      .catch(err => debug('>>> fail fetch access token: ', err));
+      .catch(err => log('>>> fail fetch access token: ', err));
   }
 }

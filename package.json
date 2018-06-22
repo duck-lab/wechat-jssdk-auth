@@ -20,6 +20,8 @@
     "@nestjs/common": "^5.0.0",
     "@nestjs/core": "^5.0.0",
     "axios": "^0.18.0",
+    "cors": "^2.8.4",
+    "dayjs": "^1.6.9",
     "fastify-formbody": "^2.0.0",
     "reflect-metadata": "^0.1.12",
     "rxjs": "^6.0.0",
