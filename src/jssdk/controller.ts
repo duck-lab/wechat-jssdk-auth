@@ -12,7 +12,7 @@ export class JSSDKController {
 
   @Get('sign')
   getSign(@Query('url') url: string): Promise<SDKSign> {
-    if (url.includes) throw new Error('Invalid URL, No "#" include.');
+    if (url.includes('#')) throw new Error('Invalid URL, No "#" include.');
     return this.sdkService.getSDKSign(url);
   }
 }
