@@ -5,25 +5,20 @@ import * as dayjs from 'dayjs';
 const log = debug('wxauth:jssdk');
 
 import { WeChatService } from '../wechat/service';
+import { ConfigService } from '../config/service';
 
 export interface SDKTicket {
   ticket: string;
   expiresIn: number;
 }
 
-const WECHAT_APP_ID = 'WECHAT_APP_ID';
-const WECHAT_SECRET = 'WECHAT_SECRET';
-
 @Injectable()
 export class JSSDKService extends WeChatService {
   private ticket: string = null;
   private ticketExpiresTime: dayjs.Dayjs = null;
 
-  constructor(
-    @Inject(WECHAT_APP_ID) appId: string,
-    @Inject(WECHAT_SECRET) secret: string,
-  ) {
-    super(appId, secret);
+  constructor(config: ConfigService) {
+    super(config.get('WECHAT_APP_ID'), config.get('WECHAT_SECRET'));
   }
 
   async getSDKTicket(): Promise<SDKTicket | void> {
