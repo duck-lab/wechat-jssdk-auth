@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 
 import * as crypto from 'crypto';
 import * as debug from 'debug';
@@ -80,10 +80,11 @@ export class JSSDKService extends WeChatService {
       });
 
       const { error: validError } = Joi.validate(input, inputSchema);
-      if (validError) throw validError;
+      if (validError) throw new BadRequestException(validError.message);
 
       const { url, randomStr, timeStamp } = input;
-      if (url.includes('#')) throw new Error('Invalid URL, No "#" include.');
+      if (url.includes('#'))
+        throw new BadRequestException('Invalid URL, No "#" include.');
       const { ticket, expiresIn } = await this.getSDKTicket();
 
       return {
