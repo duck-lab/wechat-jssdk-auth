@@ -66,19 +66,24 @@ export class JSSDKService extends WeChatService {
   }
 
   async getSDKSign(url: string): Promise<SDKSign> {
-    const { ticket, expiresIn } = await this.getSDKTicket();
+    try {
+      const { ticket, expiresIn } = await this.getSDKTicket();
 
-    return {
-      sign: crypto
-        .createHash('sha1')
-        .update(
-          `jsapi_ticket=${ticket}
-          &noncestr=${randomString.generate(16)}
-          &timestamp=${Math.floor(Date.now() / 1000)}
-          &url=${url}`,
-        )
-        .digest('hex'),
-      expiresIn,
-    };
+      return {
+        sign: crypto
+          .createHash('sha1')
+          .update(
+            `jsapi_ticket=${ticket}
+            &noncestr=${randomString.generate(16)}
+            &timestamp=${Math.floor(Date.now() / 1000)}
+            &url=${url}`,
+          )
+          .digest('hex'),
+        expiresIn,
+      };
+    } catch (error) {
+      log('>>> fail generate sign: ', error);
+      throw error;
+    }
   }
 }
