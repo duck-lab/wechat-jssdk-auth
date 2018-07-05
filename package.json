@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "format": "prettier --write \"**/*.ts\"",
-    "prestart": "rm -rf dist && tsc",
+    "prestart": "rm -rf dist/* && tsc",
     "start": "node dist/main.js",
     "start:dev": "nodemon",
     "start:hmr": "node dist/server",
