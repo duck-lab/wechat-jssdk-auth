@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 
 import * as debug from 'debug';
 import * as dayjs from 'dayjs';
@@ -38,7 +38,8 @@ export class WeChatService {
       });
 
       const { errcode, errmsg, access_token, expires_in } = data;
-      if (errcode && errcode !== 0) throw new Error(errmsg);
+      if (errcode && errcode !== 0)
+        throw new InternalServerErrorException(errmsg);
       this.accessToken = access_token;
       this.accessTokenExpiresTime = dayjs().add(
         expires_in - 200 /* Give some spare time before expires */,
