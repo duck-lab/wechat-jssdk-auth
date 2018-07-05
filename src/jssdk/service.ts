@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as debug from 'debug';
 import * as dayjs from 'dayjs';
-import * as randomString from 'randomstring';
+import * as Joi from 'joi';
 const log = debug('wxauth:jssdk');
 
 import { WeChatService } from '../wechat/service';
@@ -17,6 +17,12 @@ export interface SDKTicket {
 export interface SDKSign {
   sign: string;
   expiresIn: number;
+}
+
+interface SignInput {
+  url: string;
+  randomStr: string;
+  timeStamp: number;
 }
 
 @Injectable()
@@ -65,8 +71,19 @@ export class JSSDKService extends WeChatService {
     }
   }
 
-  async getSDKSign(url: string): Promise<SDKSign> {
+  async getSDKSign(input: SignInput): Promise<SDKSign> {
     try {
+      const inputSchema = Joi.object({
+        url: Joi.string().required(),
+        randomStr: Joi.string().required(),
+        timeStamp: Joi.number().required(),
+      });
+
+      const { error: validError } = Joi.validate(input, inputSchema);
+      if (validError) throw validError;
+
+      const { url, randomStr, timeStamp } = input;
+      if (url.includes('#')) throw new Error('Invalid URL, No "#" include.');
       const { ticket, expiresIn } = await this.getSDKTicket();
 
       return {
@@ -74,8 +91,8 @@ export class JSSDKService extends WeChatService {
           .createHash('sha1')
           .update(
             `jsapi_ticket=${ticket}
-            &noncestr=${randomString.generate(16)}
-            &timestamp=${Math.floor(Date.now() / 1000)}
+            &noncestr=${randomStr}
+            &timestamp=${timeStamp}
             &url=${url}`,
           )
           .digest('hex'),
