@@ -9,7 +9,7 @@ RUN apk add --no-cache make gcc g++ python
 RUN npm config set registry 'https://registry.npm.taobao.org'
 RUN yarn config set registry 'https://registry.npm.taobao.org'
 
-RUN npm install -g yarn
+RUN npm install -g yarn typescript
 
 WORKDIR /src
 
@@ -18,6 +18,7 @@ RUN yarn install
 
 COPY . /src
 
+RUN tsc
 
 
 FROM node:8-alpine
