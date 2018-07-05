@@ -1,6 +1,12 @@
 import { Get, Controller, Query } from '@nestjs/common';
 import { JSSDKService, SDKTicket, SDKSign } from './service';
 
+interface SignQuery {
+  url: string;
+  randomStr: string;
+  timeStamp: string;
+}
+
 @Controller('jssdk')
 export class JSSDKController {
   constructor(private readonly sdkService: JSSDKService) {}
@@ -11,8 +17,10 @@ export class JSSDKController {
   }
 
   @Get('sign')
-  getSign(@Query('url') url: string): Promise<SDKSign> {
-    if (url.includes('#')) throw new Error('Invalid URL, No "#" include.');
-    return this.sdkService.getSDKSign(url);
+  getSign(@Query() query: SignQuery): Promise<SDKSign> {
+    const input = Object.assign({}, query, {
+      timeStamp: query.timeStamp && Number(query.timeStamp),
+    });
+    return this.sdkService.getSDKSign(input);
   }
 }
