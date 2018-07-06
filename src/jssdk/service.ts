@@ -41,7 +41,8 @@ export class JSSDKService extends WeChatService {
           ticket: this.ticket,
           expiresIn: this.ticketExpiresTime.diff(dayjs(), 'second'),
         });
-      if (!this.accessToken) await this.getAccessToken();
+      if (!this.accessToken || dayjs().isAfter(this.accessTokenExpiresTime))
+        await this.getAccessToken();
 
       const { data } = await this.wechatService.get(
         '/cgi-bin/ticket/getticket',
